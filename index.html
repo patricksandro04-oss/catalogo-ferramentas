@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ferramentas Inteligentes | Achadinhos & Utilidades</title>
+
+<style>
+  /* ===========================================================
+     RESET & VARIÁVEIS
+     Paleta: cinza-escuro/preto (base) + laranja (ação) + fundo claro
+  =========================================================== */
+  :root {
+    --cor-fundo: #f4f4f5;          /* fundo claro da página */
+    --cor-cinza-escuro: #1f2226;   /* cabeçalho, textos fortes */
+    --cor-cinza-medio: #3a3f47;    /* textos secundários */
+    --cor-preto: #121417;
+    --cor-card-fundo: #ffffff;
+    --cor-borda: #e2e2e5;
+    --cor-laranja: #ff7a1a;        /* cor de ação / CTA */
+    --cor-laranja-hover: #e2650a;
+    --sombra-card: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --sombra-card-hover: 0 8px 24px rgba(0, 0, 0, 0.14);
+    --raio: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+    background-color: var(--cor-fundo);
+    color: var(--cor-cinza-escuro);
+    line-height: 1.5;
+  }
+
+  img { display: block; max-width: 100%; }
+
+  /* ===========================================================
+     CABEÇALHO
+  =========================================================== */
+  header {
+    background-color: var(--cor-preto);
+    color: #fff;
+    padding: 28px 24px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  }
+
+  header h1 {
+    font-size: 1.9rem;
+    letter-spacing: 0.5px;
+  }
+
+  header h1 span {
+    color: var(--cor-laranja);
+  }
+
+  header p {
+    color: #c7c7c7;
+    margin-top: 8px;
+    font-size: 0.95rem;
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ===========================================================
+     BARRA DE PESQUISA
+  =========================================================== */
+  .search-wrap {
+    max-width: 600px;
+    margin: 24px auto;
+    padding: 0 16px;
+  }
+
+  #search-input {
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 30px;
+    border: 2px solid var(--cor-cinza-escuro);
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background-color: #fff;
+    color: var(--cor-cinza-escuro);
+  }
+
+  #search-input:focus {
+    border-color: var(--cor-laranja);
+    box-shadow: 0 0 0 3px rgba(255, 122, 26, 0.2);
+  }
+
+  #search-input::placeholder {
+    color: #9a9a9a;
+  }
+
+  /* ===========================================================
+     GRID DE PRODUTOS (responsivo)
+  =========================================================== */
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+  }
+
+  .catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 24px;
+  }
+
+  .no-results {
+    text-align: center;
+    color: var(--cor-cinza-medio);
+    padding: 60px 0;
+    font-size: 1.1rem;
+    display: none;
+  }
+
+  /* ===========================================================
+     CARD DE PRODUTO
+  =========================================================== */
+  .product-card {
+    background-color: var(--cor-card-fundo);
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio);
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: var(--sombra-card);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    position: relative; /* necessário para posicionar o badge numerado */
+  }
+
+  /* Badge de numeração do produto (canto superior esquerdo do card) */
+  .product-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: var(--cor-cinza-escuro);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 9px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+    z-index: 2;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  }
+
+  .product-card:hover .product-badge {
+    background-color: var(--cor-laranja);
+  }
+
+  /* Etiqueta de "Esgotado" no canto superior direito do card */
+  .esgotado-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #c62828;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 4px 9px;
+    border-radius: 6px;
+    letter-spacing: 0.3px;
+    z-index: 2;
+    text-transform: uppercase;
+  }
+
+  /* Deixa o card "apagado" quando o produto está esgotado */
+  .product-card.is-esgotado .product-card-img img {
+    opacity: 0.45;
+    filter: grayscale(60%);
+  }
+
+  .product-card.is-esgotado .product-card-body h3,
+  .product-card.is-esgotado .product-card-body p {
+    color: #a3a3a3;
+  }
+
+  .product-card.is-esgotado .card-cta {
+    color: #a3a3a3;
+  }
+
+  .product-card:hover,
+  .product-card:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: var(--sombra-card-hover);
+    border-color: var(--cor-laranja);
+    outline: none;
+  }
+
+  .product-card-img {
+    width: 100%;
+    height: 190px;
+    background-color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    border-bottom: 1px solid var(--cor-borda);
+  }
+
+  /* object-fit: contain garante que a imagem não seja distorcida */
+  .product-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .product-card-body {
+    padding: 16px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .product-card-body h3 {
+    font-size: 1rem;
+    color: var(--cor-cinza-escuro);
+    line-height: 1.3;
+  }
+
+  .product-card-body p {
+    font-size: 0.85rem;
+    color: var(--cor-cinza-medio);
+    flex-grow: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-cta {
+    align-self: flex-start;
+    margin-top: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--cor-laranja);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  /* ===========================================================
+     MODAL
+  =========================================================== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(18, 20, 23, 0.75);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .modal-box {
+    background-color: #fff;
+    border-radius: var(--raio);
+    max-width: 520px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+    animation: slideUp 0.25s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background-color: var(--cor-cinza-escuro);
+    color: #fff;
+    border: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition: background-color 0.2s;
+  }
+
+  .modal-close:hover {
+    background-color: var(--cor-laranja);
+  }
+
+  .modal-img {
+    width: 100%;
+    height: 260px;
+    background-color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    border-radius: var(--raio) var(--raio) 0 0;
+  }
+
+  /* object-fit: contain também aplicado dentro do modal */
+  .modal-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .modal-content {
+    padding: 24px;
+  }
+
+  .modal-content h2 {
+    color: var(--cor-cinza-escuro);
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+  }
+
+  .modal-content p {
+    color: var(--cor-cinza-medio);
+    font-size: 0.95rem;
+    margin-bottom: 22px;
+  }
+
+  .modal-cta-btn {
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    background-color: var(--cor-laranja);
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+    padding: 14px 20px;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: background-color 0.2s, transform 0.1s;
+  }
+
+  .modal-cta-btn:hover {
+    background-color: var(--cor-laranja-hover);
+  }
+
+  .modal-cta-btn:active {
+    transform: scale(0.98);
+  }
+
+  /* Estado do botão quando o produto está esgotado */
+  .modal-cta-btn.disabled {
+    background-color: #b0b0b0;
+    pointer-events: none;
+    cursor: not-allowed;
+  }
+
+  /* ===========================================================
+     RODAPÉ
+  =========================================================== */
+  footer {
+    text-align: center;
+    padding: 24px;
+    background-color: var(--cor-preto);
+    color: #9a9a9a;
+    font-size: 0.8rem;
+  }
+
+  /* ===========================================================
+     RESPONSIVIDADE
+  =========================================================== */
+  @media (max-width: 480px) {
+    header h1 { font-size: 1.5rem; }
+    header p { font-size: 0.8rem; }
+    .catalog-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+    .product-card-img { height: 140px; }
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <h1>Ferramentas<span>Inteligentes</span></h1>
+    <p>🛠️ Achadinhos de Ferramentas & Utilidades &nbsp;|&nbsp; ⚡ Tecnologia para o seu dia a dia &nbsp;|&nbsp; 🆓 Ofertas com Frete Grátis</p>
+  </header>
+
+  <div class="search-wrap">
+    <input type="text" id="search-input" placeholder="🔍 Pesquisar por nome ou número (ex: 05)...">
+  </div>
+
+  <main>
+    <div class="catalog-grid" id="catalog-grid">
+      <!-- Os cards de produto serão inseridos aqui via JavaScript -->
+    </div>
+    <p class="no-results" id="no-results">Nenhuma ferramenta encontrada para sua pesquisa.</p>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Ferramentas Inteligentes — Catálogo de afiliados. Os links direcionam para lojas parceiras.</p>
+  </footer>
+
+  <!-- ============================================================
+       MODAL DE PRODUTO
+  ============================================================= -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-box" id="modal-box">
+      <button class="modal-close" id="modal-close" aria-label="Fechar">&times;</button>
+      <div class="modal-img">
+        <img id="modal-img" src="" alt="">
+      </div>
+      <div class="modal-content">
+        <h2 id="modal-title"></h2>
+        <p id="modal-desc"></p>
+        <a href="#" id="modal-link" target="_blank" rel="noopener noreferrer" class="modal-cta-btn">
+          Ver Oferta →
+        </a>
+      </div>
+    </div>
+  </div>
+
+<script>
+  /* ===========================================================
+     1. BASE DE DADOS DOS PRODUTOS
+     As imagens devem estar na pasta "imagens/" (ou ajuste o
+     caminho abaixo conforme a estrutura do seu projeto local).
+  =========================================================== */
+  const produtos = [
+    // ---------- #01 ----------
+    {
+      nome: "Mini Motosserra Elétrica WAP",
+      descricao: "Potência e praticidade para podas e cortes leves. Ferramenta ergonômica ideal para o dia a dia.",
+      link: "https://link.amazon/B0gRKvZq5",
+      imagem: "minimotoserraeletrica.jpeg",
+      esgotado: false
+    },
+    // ---------- #02 ----------
+    {
+      nome: "Parafusadeira WAP",
+      descricao: "Furadeira e parafusadeira de impacto com alto desempenho, perfeita para perfurações em diversos materiais.",
+      link: "https://link.amazon/B0cPV1XX8",
+      imagem: "furadeirawap.jpeg",
+      esgotado: false
+    },
+    // ---------- #03 ----------
+    {
+      nome: "Jogo 216 Ferramentas",
+      descricao: "A maleta mais completa: 216 peças para atender qualquer demanda doméstica ou profissional.",
+      link: "https://meli.la/1b6JDo9",
+      imagem: "caixadeferramentas.jpeg",
+      esgotado: false
+    },
+    // ---------- #04 ----------
+    {
+      nome: "Lavadora de Alta Pressão WAP",
+      descricao: "Alta pressão para limpeza profunda, economizando água e garantindo resultados rápidos.",
+      link: "https://link.amazon/B0heDJd27",
+      imagem: "lavadoraajatowap.jpeg",
+      esgotado: false
+    },
+    // ---------- #05 ----------
+    {
+      nome: "Chave Multifuncional 48 em 1",
+      descricao: "48 ferramentas em 1 única peça. Ideal para ter sempre à mão e resolver pequenos reparos.",
+      link: "https://s.shopee.com.br/1gGQPXPrce",
+      imagem: "chavemultifuncional.jpeg",
+      esgotado: false
+    },
+    // ---------- #06 ----------
+    {
+      nome: "Kit Extensor Eixo",
+      descricao: "Alcance locais difíceis com este extensor flexível de alta resistência para parafusadeiras.",
+      link: "https://s.shopee.com.br/1gGQQCmtmT",
+      imagem: "kitextensor.jpeg",
+      esgotado: false
+    },
+    // ---------- #07 ----------
+    {
+      nome: "Guia Gabarito para Cavilhas",
+      descricao: "Precisão absoluta em marcenaria. Faça furos alinhados e perfeitos para suas junções.",
+      link: "https://s.shopee.com.br/110jdBSehL",
+      imagem: "guiagabarito.jpeg",
+      esgotado: true
+    },
+    // ---------- #08 ----------
+    {
+      nome: "Esquadro Magnético para Solda",
+      descricao: "O aliado do soldador: posicione peças de metal em ângulos exatos com segurança total.",
+      link: "https://s.shopee.com.br/1qZqczec9O",
+      imagem: "esquadromagnetico.jpeg",
+      esgotado: false
+    },
+    // ---------- #09 ----------
+    {
+      nome: "Caneta Detectora de Tensão",
+      descricao: "Segurança primeiro! Detecta voltagem sem contato, essencial para identificar fios energizados.",
+      link: "https://s.shopee.com.br/7AbMz3H4wa",
+      imagem: "canetadetectora.jpeg",
+      esgotado: false
+    },
+    // ---------- #10 ----------
+    {
+      nome: "Jogo 4 Brocas Extratoras",
+      descricao: "Resolva parafusos espanados ou quebrados rapidamente com este kit de aço endurecido.",
+      link: "https://s.shopee.com.br/9UzHmJgFsm",
+      imagem: "kitjogo4brocas.jpeg",
+      esgotado: false
+    },
+    // ---------- #11 ----------
+    {
+      nome: "Alicate Decapador 5 em 1",
+      descricao: "Alicate 5 em 1: corta, descasca e crimpa com precisão para instalações elétricas perfeitas.",
+      link: "https://s.shopee.com.br/4VabpIz6mn",
+      imagem: "alicatedecapador.jpeg",
+      esgotado: false
+    },
+    // ---------- #12 ----------
+    {
+      nome: "Nível Laser 16 Linhas",
+      descricao: "O nível mais completo: 16 linhas verdes com tripé e controle remoto para máxima precisão.",
+      link: "https://meli.la/11E7vBE",
+      imagem: "nivellaser.jpeg",
+      esgotado: false
+    }
+  ];
+
+  /* ===========================================================
+     2. RENDERIZAÇÃO DO CATÁLOGO
+  =========================================================== */
+  const grid = document.getElementById("catalog-grid");
+  const noResults = document.getElementById("no-results");
+
+  function renderizarProdutos(lista) {
+    grid.innerHTML = "";
+
+    if (lista.length === 0) {
+      noResults.style.display = "block";
+      return;
+    }
+    noResults.style.display = "none";
+
+    lista.forEach((produto, index) => {
+      const card = document.createElement("div");
+      // Adiciona a classe "is-esgotado" quando aplicável, para o CSS "apagar" o card
+      card.className = "product-card" + (produto.esgotado ? " is-esgotado" : "");
+      card.setAttribute("tabindex", "0"); // acessível via teclado
+      card.setAttribute("data-index", index);
+
+      card.innerHTML = `
+        <span class="product-badge">#${produto.numero}</span>
+        ${produto.esgotado ? '<span class="esgotado-badge">Esgotado</span>' : ""}
+        <div class="product-card-img">
+          <img src="${produto.imagem}" alt="${produto.nome}" loading="lazy">
+        </div>
+        <div class="product-card-body">
+          <h3>${produto.nome}</h3>
+          <p>${produto.descricao}</p>
+          <span class="card-cta">${produto.esgotado ? "Indisponível" : "Ver detalhes"}</span>
+        </div>
+      `;
+
+      // O modal ainda abre mesmo esgotado (o botão de compra é quem fica desabilitado)
+      card.addEventListener("click", () => abrirModal(produto));
+
+      // Acessibilidade: abrir modal também com Enter/Espaço
+      card.addEventListener("keypress", (e) => {
+        if (e.key === "Enter" || e.key === " ") abrirModal(produto);
+      });
+
+      grid.appendChild(card);
+    });
+  }
+
+  // Atribui um número fixo a cada produto, na ordem do catálogo.
+  // Assim o número (#01, #02...) não muda quando o usuário pesquisa/filtra.
+  produtos.forEach((produto, i) => {
+    produto.numero = String(i + 1).padStart(2, "0");
+  });
+
+  renderizarProdutos(produtos);
+
+  /* ===========================================================
+     3. PESQUISA EM TEMPO REAL
+  =========================================================== */
+  const searchInput = document.getElementById("search-input");
+
+  searchInput.addEventListener("input", (e) => {
+    // Remove espaços e o caractere "#", caso o usuário digite
+    const termo = e.target.value.trim().toLowerCase().replace("#", "");
+
+    const filtrados = produtos.filter((produto) => {
+      // Permite buscar tanto "05" quanto "5"
+      const numeroSemZero = String(parseInt(produto.numero, 10));
+
+      return (
+        produto.nome.toLowerCase().includes(termo) ||
+        produto.descricao.toLowerCase().includes(termo) ||
+        produto.numero.includes(termo) ||
+        numeroSemZero === termo
+      );
+    });
+
+    renderizarProdutos(filtrados);
+  });
+
+  /* ===========================================================
+     4. MODAL — ABRIR / FECHAR
+  =========================================================== */
+  const modalOverlay = document.getElementById("modal-overlay");
+  const modalImg = document.getElementById("modal-img");
+  const modalTitle = document.getElementById("modal-title");
+  const modalDesc = document.getElementById("modal-desc");
+  const modalLink = document.getElementById("modal-link");
+  const modalClose = document.getElementById("modal-close");
+
+  function abrirModal(produto) {
+    modalImg.src = produto.imagem;
+    modalImg.alt = produto.nome;
+    modalTitle.textContent = `#${produto.numero} — ${produto.nome}`;
+    modalDesc.textContent = produto.descricao;
+
+    if (produto.esgotado) {
+      // Produto esgotado: desabilita o botão e remove o link de destino
+      modalLink.href = "#";
+      modalLink.classList.add("disabled");
+      modalLink.textContent = "Produto Esgotado";
+    } else {
+      modalLink.href = produto.link;
+      modalLink.classList.remove("disabled");
+      modalLink.textContent = "Ver Oferta →";
+    }
+
+    modalOverlay.classList.add("active");
+    document.body.style.overflow = "hidden"; // trava scroll do fundo
+  }
+
+  function fecharModal() {
+    modalOverlay.classList.remove("active");
+    document.body.style.overflow = "";
+  }
+
+  // Fecha ao clicar no botão "X"
+  modalClose.addEventListener("click", fecharModal);
+
+  // Fecha ao clicar na área escurecida (overlay), mas não ao clicar dentro do modal
+  modalOverlay.addEventListener("click", (e) => {
+    if (e.target === modalOverlay) {
+      fecharModal();
+    }
+  });
+
+  // Fecha com a tecla ESC (bônus de usabilidade)
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modalOverlay.classList.contains("active")) {
+      fecharModal();
+    }
+  });
+</script>
+
+</body>
+</html>
